@@ -27,8 +27,10 @@ func (h FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if createFeatureFlag.Name == "" {
-		http.Error(w, `{"error": "Field 'name' is required"}`, http.StatusBadRequest)
+	if err := validate.Struct(createFeatureFlag); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity) // 422
+		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
 		return
 	}
 
@@ -78,6 +80,13 @@ func (h FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validate.Struct(updateFeatureFlag); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity) // 422
+		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
+		return
+	}
+
 	if err := h.repository.Update(r.Context(), Operation[UpdateFeatureFlag]{Data: updateFeatureFlag, Tenant: "test-tenant", User: "user-1"}); err != nil {
 		slog.Error("Failed to update flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
@@ -95,9 +104,18 @@ func (h FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 func (h FeatureFlagHandler) DeleteFlag(w http.ResponseWriter, r *http.Request) {
 	flagID := chi.URLParam(r, "id")
 
-	if err := h.repository.DeleteById(r.Context(), Operation[DeleteFeatureFlag]{Data: DeleteFeatureFlag{
+	deleteFeatureFlag := DeleteFeatureFlag{
 		ID: flagID,
-	}, Tenant: "test-tenant", User: "user-1"}); err != nil {
+	}
+
+	if err := validate.Struct(deleteFeatureFlag); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity) // 422
+		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
+		return
+	}
+
+	if err := h.repository.DeleteById(r.Context(), Operation[DeleteFeatureFlag]{Data: deleteFeatureFlag, Tenant: "test-tenant", User: "user-1"}); err != nil {
 		slog.Error("Failed to delete flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
 		return
