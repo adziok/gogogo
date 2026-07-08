@@ -1,5 +1,7 @@
 version: '3'
 
+dotenv: ['.env']
+
 tasks:
   dev:
     desc: Dev server
@@ -10,6 +12,16 @@ tasks:
     desc: Build app
     cmds:
       - go build -o bin/server ./cmd/server/main.go
+
+  db:migrate:
+    cmds:
+      - goose -dir db/postgres/migrations postgres "$DB_POSTGRES_URL" up
+      # - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" up
+
+  db:migrate:down:
+    cmds:
+      - goose -dir db/postgres/migrations postgres "$DB_POSTGRES_URL" down
+      # - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" up
 
   test:
     desc: Run all unit tests
@@ -25,3 +37,15 @@ tasks:
      desc: Run formater
      cmds:
        - golangci-lint fmt
+
+  infra:up:
+    cmds:
+      - docker compose up -d
+
+  infra:down:
+    cmds:
+      - docker compose down
+
+  infra:logs:
+    cmds:
+      - docker compose logs -f

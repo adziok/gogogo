@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: go_project_postgres
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    container_name: go_project_clickhouse
+    environment:
+      CLICKHOUSE_USER: dev_user
+      CLICKHOUSE_PASSWORD: dev_password
+      CLICKHOUSE_DB: analytics_db
+    ports:
+      - "8123:8123" # HTTP Interface (używany przez większość driverów Go)
+      - "9000:9000" # Native TCP Interface
+    volumes:
+      - chdata:/var/lib/clickhouse
+    ulimits: # ClickHouse wymaga wyższych limitów na pliki pod dużym obciążeniem
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  chdata:
