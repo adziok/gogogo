@@ -47,6 +47,9 @@ func main() {
 
 	r.Route("/feature-flag", func(r chi.Router) {
 		r.Post("/", featureFlagHandler.CreateFlag)
+		r.Get("/", featureFlagHandler.DisplayFlags)
+		r.Delete("/{id}", featureFlagHandler.DeleteFlag)
+		r.Put("/{id}", featureFlagHandler.UpdateFlag)
 	})
 
 	port := ":8080"

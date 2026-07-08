@@ -2,9 +2,15 @@ package feature_flags
 
 import "context"
 
+type Operation[T any] struct {
+	Data   T
+	Tenant string
+	User   string
+}
+
 type FeatureFlagRepository interface {
-	Create(ctx context.Context, f CreateFeatureFlag, tenant string, creator string) error
-	Update(ctx context.Context, f FeatureFlag) error
-	GetByID(ctx context.Context, id string) (*FeatureFlag, error)
-	GetByTenant(ctx context.Context, tenant string) (*[]FeatureFlag, error)
+	Create(ctx context.Context, f Operation[CreateFeatureFlag]) error
+	Update(ctx context.Context, f Operation[UpdateFeatureFlag]) error
+	DeleteById(ctx context.Context, f Operation[DeleteFeatureFlag]) error
+	GetByTenant(ctx context.Context, tenant string) ([]FeatureFlag, error)
 }

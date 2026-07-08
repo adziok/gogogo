@@ -21,3 +21,13 @@ type CreateFeatureFlag struct {
 	Description string `json:"description"`
 	Enabled     bool   `json:"enabled"`
 }
+
+type DeleteFeatureFlag struct {
+	ID string `json:"id"`
+}
+
+type UpdateFeatureFlag struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+}
