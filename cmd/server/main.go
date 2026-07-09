@@ -69,6 +69,7 @@ func main() {
 			logger.Info("im here")
 			return middleware.CheckJWT(next)
 		})
+		r.Use(auth.UserDetailsMiddleware)
 
 		r.Post("/", featureFlagHandler.CreateFlag)
 		r.Get("/", featureFlagHandler.DisplayFlags)

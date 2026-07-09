@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"start/internal/auth"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -34,7 +35,8 @@ func (h FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repository.Create(r.Context(), Operation[CreateFeatureFlag]{Data: createFeatureFlag, Tenant: "test-tenant", User: "user-1"}); err != nil {
+	userDetails := auth.GetUserDetails(r.Context())
+	if err := h.repository.Create(r.Context(), Operation[CreateFeatureFlag]{Data: createFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
 		slog.Error("Failed to save flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
 		return
@@ -49,7 +51,9 @@ func (h FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h FeatureFlagHandler) DisplayFlags(w http.ResponseWriter, r *http.Request) {
-	data, err := h.repository.GetByTenant(r.Context(), "test-tenant")
+	userDetails := auth.GetUserDetails(r.Context())
+	slog.Info(userDetails.UserID, userDetails.OrgID)
+	data, err := h.repository.GetByTenant(r.Context(), userDetails.OrgID)
 	if err != nil {
 		slog.Error("Failed to save flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
@@ -87,7 +91,8 @@ func (h FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repository.Update(r.Context(), Operation[UpdateFeatureFlag]{Data: updateFeatureFlag, Tenant: "test-tenant", User: "user-1"}); err != nil {
+	userDetails := auth.GetUserDetails(r.Context())
+	if err := h.repository.Update(r.Context(), Operation[UpdateFeatureFlag]{Data: updateFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
 		slog.Error("Failed to update flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
 		return
@@ -115,7 +120,8 @@ func (h FeatureFlagHandler) DeleteFlag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repository.DeleteById(r.Context(), Operation[DeleteFeatureFlag]{Data: deleteFeatureFlag, Tenant: "test-tenant", User: "user-1"}); err != nil {
+	userDetails := auth.GetUserDetails(r.Context())
+	if err := h.repository.DeleteById(r.Context(), Operation[DeleteFeatureFlag]{Data: deleteFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
 		slog.Error("Failed to delete flag to database", "error", err)
 		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
 		return

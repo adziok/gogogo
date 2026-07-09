@@ -8,7 +8,9 @@ import (
 
 // CustomClaims contains custom data we want to parse from the JWT.
 type CustomClaims struct {
-	Scope string `json:"scope"`
+	Scope  string `json:"scope"`
+	OrgID  string `json:"org_id"`
+	UserID string `json:"sub"`
 }
 
 // Validate ensures the custom claims are properly formatted.
