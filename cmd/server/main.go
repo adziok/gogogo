@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"log"
 	"log/slog"
 	"net/http"
@@ -15,6 +16,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 )
+
+//go:embed ui/*
+var uiFS embed.FS
 
 func main() {
 	godotenv.Load()
@@ -51,6 +55,8 @@ func main() {
 		r.Delete("/{id}", featureFlagHandler.DeleteFlag)
 		r.Put("/{id}", featureFlagHandler.UpdateFlag)
 	})
+
+	r.Handle("/*", http.FileServer(http.FS(uiFS)))
 
 	port := ":8080"
 	logger.Info("Hell yeah! Server is starting", "port", port)

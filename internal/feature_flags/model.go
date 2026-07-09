@@ -31,7 +31,7 @@ type DeleteFeatureFlag struct {
 type UpdateFeatureFlag struct {
 	ID          string `json:"id" validate:"required,uuid"`
 	Description string `json:"description" validate:"required,max=100"`
-	Enabled     bool   `json:"enabled" validate:"boolen"`
+	Enabled     bool   `json:"enabled" validate:"boolean"`
 }
 
 var validate = validator.New()
