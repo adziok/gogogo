@@ -32,7 +32,6 @@ func (r *FeatureFlagPostgresRepository) Create(ctx context.Context, f Operation[
 	return nil
 }
 
-// UPDATE public.feature_flags SET description=”, "name"=”, enabled=false, tenant=”, created_at=timezone('utc'::text, now()), created_by=”, updated_at=timezone('utc'::text, now()), updated_by=” WHERE id=?;
 func (r *FeatureFlagPostgresRepository) Update(ctx context.Context, f Operation[UpdateFeatureFlag]) error {
 	query := `
 	UPDATE public.feature_flags
@@ -82,7 +81,6 @@ func (r *FeatureFlagPostgresRepository) GetByTenant(ctx context.Context, tenant 
 	for result.Next() {
 		var f FeatureFlag
 
-		// Mapujemy kolumny z bieżącego wiersza na strukturę
 		if err := result.Scan(
 			&f.ID,
 			&f.Name,
@@ -97,10 +95,8 @@ func (r *FeatureFlagPostgresRepository) GetByTenant(ctx context.Context, tenant 
 			return nil, fmt.Errorf("postgres failed to scan feature flag row: %w", err)
 		}
 
-		// Dodajemy sparsowany obiekt do naszej listy
 		flags = append(flags, f)
 	}
-	// 5. Po zakończeniu pętli zawsze sprawdzamy, czy w trakcie iteracji nie wystąpił błąd bazy
 	if err := result.Err(); err != nil {
 		return nil, fmt.Errorf("postgres rows error: %w", err)
 	}

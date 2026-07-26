@@ -6,8 +6,9 @@ import (
 )
 
 type AuthConfig struct {
-	Domain   string
-	Audience string
+	Domain      string
+	Audience    string
+	AudienceApi string
 }
 
 func LoadAuthConfig() (*AuthConfig, error) {
@@ -21,8 +22,14 @@ func LoadAuthConfig() (*AuthConfig, error) {
 		return nil, fmt.Errorf("AUTH0_AUDIENCE environment variable required")
 	}
 
+	audienceApi := os.Getenv("AUTH0_AUDIENCE_API")
+	if audience == "" {
+		return nil, fmt.Errorf("AUTH0_AUDIENCE environment variable required")
+	}
+
 	return &AuthConfig{
-		Domain:   domain,
-		Audience: audience,
+		Domain:      domain,
+		Audience:    audience,
+		AudienceApi: audienceApi,
 	}, nil
 }

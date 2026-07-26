@@ -10,6 +10,7 @@ import (
 
 	"start/internal/auth"
 	"start/internal/database"
+	externalapi "start/internal/external_api"
 	"start/internal/feature_flags"
 
 	"github.com/go-chi/chi/v5"
@@ -66,7 +67,6 @@ func main() {
 
 	r.Route("/feature-flag", func(r chi.Router) {
 		r.Use(func(next http.Handler) http.Handler {
-			logger.Info("im here")
 			return middleware.CheckJWT(next)
 		})
 		r.Use(auth.UserDetailsMiddleware)
@@ -75,6 +75,30 @@ func main() {
 		r.Get("/", featureFlagHandler.DisplayFlags)
 		r.Delete("/{id}", featureFlagHandler.DeleteFlag)
 		r.Put("/{id}", featureFlagHandler.UpdateFlag)
+	})
+
+	externalApiRepo := externalapi.NewFeatureFlagExternalPostgresReposiotory(pgPool)
+	externalApiHandler := externalapi.CreateExternalApiHandler(externalApiRepo)
+
+	r.Route("/api", func(r chi.Router) {
+		// Create JWT validator
+		jwtValidator, err := auth.NewValidator(cfg.Domain, cfg.AudienceApi)
+		if err != nil {
+			log.Fatalf("Failed to create validator: %v", err)
+		}
+
+		// Create HTTP middleware
+		middleware, err := auth.NewMiddleware(jwtValidator)
+		if err != nil {
+			log.Fatalf("Failed to create middleware: %v", err)
+		}
+
+		r.Use(func(next http.Handler) http.Handler {
+			return middleware.CheckJWT(next)
+		})
+		r.Use(auth.UserDetailsMiddleware)
+
+		r.Get("/{id}", externalApiHandler.GetByTenantAndName)
 	})
 
 	port := ":8080"

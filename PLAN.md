@@ -11,10 +11,10 @@ Create rest api with will support:
 
 ## STAGE 2
 - [x] Add auth0 authorization and login page. 
-- [ ] Add machine to machine authorization for "client" of the feature flags app
+- [x] Add machine to machine authorization for "client" of the feature flags app
 - [x] Update logic related to tenant
-- [ ] Update error handling to use more standarize Errors
+- [x] Update error handling to use more standarize Errors
 - [x] Create simple UI with option to manage these things
-- [ ] Expose separate endpoint to get the flag
+- [x] Expose separate endpoint to get the flag
 
 ### STAGE 3

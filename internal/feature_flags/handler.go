@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"start/internal/auth"
+	"start/internal/common"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -19,26 +20,22 @@ func NewFeatureFlagHandler(repo FeatureFlagRepository) *FeatureFlagHandler {
 	}
 }
 
-func (h FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
+func (h *FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 	var createFeatureFlag CreateFeatureFlag
 
 	if err := json.NewDecoder(r.Body).Decode(&createFeatureFlag); err != nil {
-		slog.Warn("Failed to decode create flag request", "error", err)
-		http.Error(w, `{"error": "Invalid JSON body"}`, http.StatusBadRequest)
+		common.RenderErr(w, r, http.StatusBadRequest, err, "Invalid JSON body")
 		return
 	}
 
 	if err := validate.Struct(createFeatureFlag); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity) // 422
-		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
+		common.RenderErr(w, r, http.StatusUnprocessableEntity, err, "Validation failed")
 		return
 	}
 
 	userDetails := auth.GetUserDetails(r.Context())
 	if err := h.repository.Create(r.Context(), Operation[CreateFeatureFlag]{Data: createFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
-		slog.Error("Failed to save flag to database", "error", err)
-		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		common.RenderErr(w, r, http.StatusInternalServerError, err, "Internal server error")
 		return
 	}
 
@@ -50,13 +47,11 @@ func (h FeatureFlagHandler) CreateFlag(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h FeatureFlagHandler) DisplayFlags(w http.ResponseWriter, r *http.Request) {
+func (h *FeatureFlagHandler) DisplayFlags(w http.ResponseWriter, r *http.Request) {
 	userDetails := auth.GetUserDetails(r.Context())
-	slog.Info(userDetails.UserID, userDetails.OrgID)
 	data, err := h.repository.GetByTenant(r.Context(), userDetails.OrgID)
 	if err != nil {
-		slog.Error("Failed to save flag to database", "error", err)
-		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		common.RenderErr(w, r, http.StatusInternalServerError, err, "Internal server error")
 		return
 	}
 
@@ -68,33 +63,29 @@ func (h FeatureFlagHandler) DisplayFlags(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
+func (h *FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 	flagID := chi.URLParam(r, "id")
 
 	if flagID == "" {
-		http.Error(w, `{"error": "flagID is required"}`, http.StatusBadRequest)
+		common.RenderErr(w, r, http.StatusBadRequest, nil, "Flag ID is required")
 		return
 	}
 
 	updateFeatureFlag := UpdateFeatureFlag{ID: flagID}
 
 	if err := json.NewDecoder(r.Body).Decode(&updateFeatureFlag); err != nil {
-		slog.Warn("Failed to decode create flag request", "error", err)
-		http.Error(w, `{"error": "Invalid JSON body"}`, http.StatusBadRequest)
+		common.RenderErr(w, r, http.StatusBadRequest, err, "Invalid JSON body")
 		return
 	}
 
 	if err := validate.Struct(updateFeatureFlag); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity) // 422
-		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
+		common.RenderErr(w, r, http.StatusUnprocessableEntity, err, "Validation failed")
 		return
 	}
 
 	userDetails := auth.GetUserDetails(r.Context())
 	if err := h.repository.Update(r.Context(), Operation[UpdateFeatureFlag]{Data: updateFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
-		slog.Error("Failed to update flag to database", "error", err)
-		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		common.RenderErr(w, r, http.StatusInternalServerError, err, "Internal server error")
 		return
 	}
 
@@ -106,7 +97,7 @@ func (h FeatureFlagHandler) UpdateFlag(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h FeatureFlagHandler) DeleteFlag(w http.ResponseWriter, r *http.Request) {
+func (h *FeatureFlagHandler) DeleteFlag(w http.ResponseWriter, r *http.Request) {
 	flagID := chi.URLParam(r, "id")
 
 	deleteFeatureFlag := DeleteFeatureFlag{
@@ -114,16 +105,13 @@ func (h FeatureFlagHandler) DeleteFlag(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validate.Struct(deleteFeatureFlag); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity) // 422
-		w.Write([]byte(`{"error": "Validation failed", "details": "` + err.Error() + `"}`))
+		common.RenderErr(w, r, http.StatusUnprocessableEntity, err, "Validation failed")
 		return
 	}
 
 	userDetails := auth.GetUserDetails(r.Context())
 	if err := h.repository.DeleteById(r.Context(), Operation[DeleteFeatureFlag]{Data: deleteFeatureFlag, Tenant: userDetails.OrgID, User: userDetails.UserID}); err != nil {
-		slog.Error("Failed to delete flag to database", "error", err)
-		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		common.RenderErr(w, r, http.StatusInternalServerError, err, "Internal server error")
 		return
 	}
 
