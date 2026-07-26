@@ -1,0 +1,14 @@
+{
+  "name": "m2m-traffic-generator",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "M2M Auth0 client credentials flow tester and traffic generator for the feature flag service",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
