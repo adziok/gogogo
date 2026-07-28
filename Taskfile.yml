@@ -16,12 +16,12 @@ tasks:
   db:migrate:
     cmds:
       - goose -dir db/postgres/migrations postgres "$DB_POSTGRES_URL" up
-      # - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" up
+      - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" up
 
   db:migrate:down:
     cmds:
       - goose -dir db/postgres/migrations postgres "$DB_POSTGRES_URL" down
-      # - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" up
+      - goose -dir db/clickhouse/migrations clickhouse "$DB_CLICKHOUSE_URL" down
 
   test:
     desc: Run all unit tests

@@ -9,7 +9,8 @@
 
 
 ## Description
-Project is invented to learn golang. Code in go and all arround it is human writen (with llm support).
+Project is invented to learn golang. Code in go and all arround it is human writen (with llm support). 
+> Later I use codex a bit when I feel more comfortable with the GO :) 
 I use Gemini to learn concepts, find packages, docs or references.
 
-Folder `ui` is vibecoded.
+Folder `ui` and `m2m` is vibecoded.

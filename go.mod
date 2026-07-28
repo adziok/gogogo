@@ -16,6 +16,7 @@ require (
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/auth0/go-jwt-middleware/v3 v3.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/confluentinc/confluent-kafka-go/v2 v2.15.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
